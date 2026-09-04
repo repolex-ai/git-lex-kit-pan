@@ -1,0 +1,22 @@
+# git-lex kit configuration
+# Pan kit — the media store's kit. Opt-in add-on (like ravel and copia): a soul
+# installs it (`git lex kit-add repolex-ai/git-lex-kit-pan`) and gets the pan
+# ontology installed to .lex/ontology/pan/, which is what lets git-lex bind the
+# `pan:` prefix and read the soul's media graph at .pan/_ignore/oxigraph
+# (pand writes it; git-lex reads it — one writer, many readers).
+#
+# Everything in .pan/ OUTSIDE _ignore/ is committable by the pocket law (Rob,
+# 2026-08-05); git-lex already manages the `.pan/_ignore/` gitignore entry.
+#
+# Ontology source of truth is the PAN APP REPO (repolex-ai/pan, ontology/pan.ttl).
+# Do not edit ontology/pan/pan.ttl in this repo; publish from the app repo.
+scope: optional
+
+name: pan
+
+# NO folder installation: every pan class is graph-only (no git-lex:foldered
+# flag anywhere in pan.ttl) — instances live in .pan/_ignore/oxigraph, written
+# by pand, never as authored markdown. kit-add scaffolds ZERO folders.
+install folders: false
+
+init_prompts: []
