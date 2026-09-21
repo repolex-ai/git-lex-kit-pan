@@ -44,11 +44,41 @@
 <https://repolex.ai/ontology/pan> a owl:Ontology ;
     rdfs:label "Pan media store ontology" ;
     rdfs:comment "Identity, location, timing and model-derived enrichment facts Pan records for stored media." ;
-    owl:versionInfo "0.4.16" .
+    owl:versionInfo "0.4.17" .
 
 # -----------------------------------------------------------------------------
 # CHANGELOG
 # -----------------------------------------------------------------------------
+# v0.4.17 (2026-09-21, ruled by goodlux): WHAT THE IMAGE IS.
+#   Pan has hashed images since the store was written and never recorded the
+#   answer. The hash lived inside tests, proving that writing metadata leaves
+#   the image alone, and a stored file had no name for its own contents in the
+#   graph or in itself.
+#   + pan:imageSha256Hash on pan:Image. The sha256 of every block of the PNG
+#   except its XMP, each taken as it sits on disk: the header, the pixel data,
+#   the palette, the transparency, the colour profile, the generator's render
+#   chunk, every other text block, in file order. Nothing is decoded and
+#   nothing is normalised.
+#   The XMP is left out because Pan writes it. Pan rewrites that block every
+#   time a stage finishes, and a hash that moved whenever Pan touched its own
+#   metadata would say nothing about the image. Leaving it out fixes the hash
+#   from the moment the file is stored.
+#   On pan:Image, not pan:Media: the rule "everything but the XMP" is a rule
+#   about a PNG. What a video or an audio file would have to exclude to be
+#   stable under Pan's own writes is a different question, and belongs to
+#   whoever declares that hash.
+#   NOT an identity. Identity is pan:id, assigned once. This answers whether
+#   two files hold the same thing: the same image arriving again under another
+#   name, from another store, or shared back.
+#   Written at ingest by pand. A file whose blocks will not read is still
+#   stored and simply carries no hash.
+#   Removed with it: the rule that this hash match another program byte for
+#   byte. That rule came from Pool, where the hash WAS the identity and three
+#   languages had to agree on it; it is why alpha and the low byte of a 16-bit
+#   sample were being thrown away. Identity moved to an assigned pan:id and
+#   the rule should have gone then.
+#   Deliberately not done here: comparing an arrival's contents with the
+#   stored file's after a JPEG is converted. That stays in issue #23.
 # v0.4.16 (2026-09-20, ruled by goodlux): IS THE BODY RIGHT.
 #   0.4.15 added two scores and said anatomy was "a separate question and is
 #   not ruled". It is ruled now: a third score and critique on the same
@@ -609,6 +639,17 @@ pan:sourceFile a owl:DatatypeProperty ;
     rdfs:label "source file" ;
     rdfs:comment "Path of the file this source was made from, relative to pan:mediaRoot; the source's own path when it arrived as PNG. Never an absolute path; never omitted." ;
     rdfs:domain pan:Media ;
+    rdfs:range xsd:string .
+
+# What the image IS: the sha256 of every block of the PNG except the XMP,
+# which Pan writes and rewrites. Everything else counts — pixels, palette,
+# transparency, colour profile, the generator's render chunk, every text
+# block. Identity stays pan:id; this answers "is this the same image", so
+# one reshared or re-delivered can be recognised (goodlux, 2026-09-21).
+pan:imageSha256Hash a owl:DatatypeProperty ;
+    rdfs:label "image sha256 hash" ;
+    rdfs:comment "sha256 of the whole image file except its XMP. Written by pand at ingest; not an identity and not settable by hand." ;
+    rdfs:domain pan:Image ;
     rdfs:range xsd:string .
 
 # The request that made the image, kept whole and not taken apart. A
@@ -1237,6 +1278,7 @@ pan:Media rdfs:subClassOf
     [ a owl:Restriction ; owl:onProperty pan:height     ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:thumbnail  ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:modelPromptPath ; owl:maxCardinality 1 ] ,
+    [ a owl:Restriction ; owl:onProperty pan:imageSha256Hash ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:renderRequestInformation ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:imageTechnicalScore ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:imageTechnicalCritique ; owl:maxCardinality 1 ] ,
