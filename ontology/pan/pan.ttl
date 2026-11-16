@@ -43,11 +43,22 @@
 <https://repolex.ai/ontology/pan> a owl:Ontology ;
     rdfs:label "Pan media store ontology" ;
     rdfs:comment "Identity, location, timing and model-derived enrichment facts Pan records for stored media." ;
-    owl:versionInfo "0.4.27" .
+    owl:versionInfo "0.4.28" .
 
 # -----------------------------------------------------------------------------
 # CHANGELOG
 # -----------------------------------------------------------------------------
+# v0.4.28 (2026-11-16, ruled by goodlux): A TITLE.
+#   + pan:title on pan:Node, Pan's spelling of subtexture:title: one short
+#   line of text naming the Thing. At most one, never required. A person or
+#   a producer sets it like any other field: on media through
+#   `pan set … title=…` and POST /media/{id}/set, written into the file's
+#   XMP; on a set at creation and through the set's own set command, kept in
+#   the set's file. Needed first on sets, where the id has been doing a
+#   title's work.
+#   NOT done: pan:abstract and pan:cue. The base declares them; Pan keeps
+#   its captions, the photographer's word, and has no use for a cue. Nothing
+#   fills a title on its own, and no existing record gets one.
 # v0.4.27 (2026-11-16, ruled by goodlux): ONE PARENT, THE BASE.
 #   Each application owns its namespace and bridges to subtexture:* only;
 #   none names another application's ontology (subtexture.ttl 0.3.0).
@@ -1021,6 +1032,15 @@ pan:mediaCreatedDate a owl:DatatypeProperty ;
     rdfs:domain pan:Media ;
     rdfs:range xsd:dateTime .
 
+# Pan's spelling of subtexture:title: the short line a listing shows. A
+# person's or a producer's words; pand never makes one up.
+pan:title a owl:DatatypeProperty ;
+    owl:equivalentProperty subtexture:title ;
+    rdfs:label "title" ;
+    rdfs:comment "One short line naming this Thing, as a listing shows it; Pan's spelling of subtexture:title. One value; overwrite it, do not repeat the key. Not the id, and not a caption." ;
+    rdfs:domain pan:Node ;
+    rdfs:range xsd:string .
+
 # Pan's spelling of subtexture:description (same pattern as pan:id): a Pan
 # file carries only pan and copia, so the universal is written under pan:.
 pan:description a owl:DatatypeProperty ;
@@ -1136,7 +1156,7 @@ pan:isRejected a owl:DatatypeProperty ;
 # the fact travels with the file; the set's members are read from the images.
 # The code enforces the kind at add time, since membership is written on the
 # member and a set-side restriction cannot reach it. The set node carries id,
-# description and createdDate. No ordering: one image in two sets has two
+# title, description and createdDate. No ordering: one image in two sets has two
 # positions.
 # -----------------------------------------------------------------------------
 
@@ -1512,6 +1532,7 @@ pan:Media rdfs:subClassOf
     [ a owl:Restriction ; owl:onProperty pan:mediaCreatedDate ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:enrichmentCompleteDate ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:updatedDate ; owl:maxCardinality 1 ] ,
+    [ a owl:Restriction ; owl:onProperty pan:title ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:width      ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:height     ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:thumbnail  ; owl:maxCardinality 1 ] ,
@@ -1530,8 +1551,8 @@ pan:Media rdfs:subClassOf
     [ a owl:Restriction ; owl:onProperty pan:isPicked   ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:isRejected ; owl:maxCardinality 1 ] .
 
-# A MediaSet: one id, one creation time, at most one update time and one
-# description. Spelled pan: as everywhere else in Pan. pan:ImageSet inherits
+# A MediaSet: one id, one creation time, at most one update time, one title
+# and one description. Spelled pan: as everywhere else in Pan. pan:ImageSet inherits
 # this block.
 pan:Video rdfs:subClassOf
     [ a owl:Restriction ; owl:onProperty pan:duration  ; owl:maxCardinality 1 ] ,
@@ -1541,6 +1562,7 @@ pan:MediaSet rdfs:subClassOf
     [ a owl:Restriction ; owl:onProperty pan:id ; owl:cardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:createdDate ; owl:cardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:updatedDate ; owl:maxCardinality 1 ] ,
+    [ a owl:Restriction ; owl:onProperty pan:title ; owl:maxCardinality 1 ] ,
     [ a owl:Restriction ; owl:onProperty pan:description ; owl:maxCardinality 1 ] .
 
 # An Instance: one id, one root, one mode, one port; the rest at most once.
