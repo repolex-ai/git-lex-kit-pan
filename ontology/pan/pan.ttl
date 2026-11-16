@@ -1,5 +1,4 @@
 @prefix pan:     <https://repolex.ai/ontology/pan/> .
-@prefix git-lex: <https://repolex.ai/ontology/git-lex/> .
 @prefix subtexture: <https://repolex.ai/ontology/subtexture/> .
 @prefix owl:     <http://www.w3.org/2002/07/owl#> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
@@ -13,9 +12,9 @@
 # stored object. Code implements this; it never adds to it — Rob ruled on
 # 2026-09-03 that the ontology comes first and every fact Pan emits is declared here.
 #
-# Pan's parents: subtexture (the base ontology, subtexture/ontology/
-# subtexture.ttl: Thing, Set, Sequence and the universals) and git-lex (the
-# kit layer: git-lex:Thing sits under subtexture:Thing).
+# Pan's one parent is subtexture, the base ontology (ontology/subtexture.ttl,
+# shipped beside this file: Thing, Set, NamedGraph and the universals). Pan
+# names no other application's ontology.
 #
 # Published to git-lex as the kit `repolex-ai/git-lex-kit-pan` so a soul that
 # installs it can query its own media graph through git-lex and Syrinx.
@@ -44,11 +43,29 @@
 <https://repolex.ai/ontology/pan> a owl:Ontology ;
     rdfs:label "Pan media store ontology" ;
     rdfs:comment "Identity, location, timing and model-derived enrichment facts Pan records for stored media." ;
-    owl:versionInfo "0.4.26" .
+    owl:versionInfo "0.4.27" .
 
 # -----------------------------------------------------------------------------
 # CHANGELOG
 # -----------------------------------------------------------------------------
+# v0.4.27 (2026-11-16, ruled by goodlux): ONE PARENT, THE BASE.
+#   Each application owns its namespace and bridges to subtexture:* only;
+#   none names another application's ontology (subtexture.ttl 0.3.0).
+#   (1) pan:Node rdfs:subClassOf subtexture:Thing, and no longer git-lex:Thing.
+#   (2) pan:id, pan:relatedToId and pan:item range subtexture:Thing (was
+#       git-lex:Thing).
+#   (3) Bridges are to the base alone: pan:id, pan:createdDate and
+#       pan:relatedToId lose their git-lex: equivalents; pan:description is
+#       now equivalent to subtexture:description (was git-lex:description);
+#       pan:updatedDate gains the bridge to subtexture:updatedDate it never
+#       had.
+#   (4) The git-lex: prefix is gone from this file. Comments only: the
+#       sentence saying the SHACL generator was being fixed to follow
+#       owl:equivalentProperty is removed; it does.
+#   No stored fact changes: pand has written pan: predicates and pan: classes
+#   only since 0.4.6, and no record names a parent class.
+#   NOT done: pan:title, pan:abstract, pan:cue. The base declares all three;
+#   nothing in Pan writes one, and each is declared here when something does.
 # v0.4.26 (2026-11-12, ruled by goodlux): VIDEOSETS ARE WRITTEN.
 #   Clips made from Pan stills are arriving in numbers (LTX image-to-video,
 #   eight clips to a film), and each film needs its set. pan:VideoSet,
@@ -708,14 +725,13 @@
 # THE BASE NODE
 # -----------------------------------------------------------------------------
 # pan:Node is the abstract root for all entities in the Pan media store.
-# Subclasses subtexture:Thing (and git-lex:Thing) so every Pan entity is a
-# subtexture Thing. Properties shared across Pan classes (pan:id, model,
+# Subclasses subtexture:Thing, so every Pan entity is a subtexture Thing. Properties shared across Pan classes (pan:id, model,
 # dimensions, paths) have domain pan:Node, preventing them from polluting the
 # universal Thing across other kits.
 # -----------------------------------------------------------------------------
 
 pan:Node a owl:Class ;
-    rdfs:subClassOf subtexture:Thing , git-lex:Thing ;
+    rdfs:subClassOf subtexture:Thing ;
     rdfs:label "Node" ;
     rdfs:comment "Abstract root entity for the Pan media store; sits under subtexture:Thing." .
 
@@ -975,22 +991,23 @@ pan:sceneSubjectOrientation a owl:DatatypeProperty ;
 # own (goodlux, 2026-09-16), so its domain is pan:Node.
 
 pan:id a owl:ObjectProperty ;
-    owl:equivalentProperty subtexture:id , git-lex:id ;
+    owl:equivalentProperty subtexture:id ;
     rdfs:label "id" ;
-    rdfs:comment "Which Thing this node IS, written <pan/Class/id>; the file spelling of git-lex:id. On media and on every record and reference. Never write the bare token." ;
+    rdfs:comment "Which Thing this node IS, written <pan/Class/id>; Pan's spelling of subtexture:id. On media and on every record and reference. Never write the bare token." ;
     rdfs:domain pan:Node ;
-    rdfs:range git-lex:Thing .
+    rdfs:range subtexture:Thing .
 
 pan:createdDate a owl:DatatypeProperty ;
-    owl:equivalentProperty subtexture:createdDate , git-lex:createdDate ;
+    owl:equivalentProperty subtexture:createdDate ;
     rdfs:label "created date" ;
-    rdfs:comment "When the Pan record was created, RFC3339 system local time; the file spelling of git-lex:createdDate. Not when the media was made; that is pan:mediaCreatedDate." ;
+    rdfs:comment "When the Pan record was created, RFC3339 system local time; Pan's spelling of subtexture:createdDate. Not when the media was made; that is pan:mediaCreatedDate." ;
     rdfs:domain pan:Node ;
     rdfs:range xsd:dateTime .
 
 # When the node's own file was last written, by any route. pand moves it;
 # a producer never sends it. Equal to pan:createdDate at ingest.
 pan:updatedDate a owl:DatatypeProperty ;
+    owl:equivalentProperty subtexture:updatedDate ;
     rdfs:label "updated date" ;
     rdfs:comment "When this record's own file was last written, RFC3339 system local time. pand writes it on every write of the file; never send it." ;
     rdfs:domain pan:Node ;
@@ -1004,12 +1021,12 @@ pan:mediaCreatedDate a owl:DatatypeProperty ;
     rdfs:domain pan:Media ;
     rdfs:range xsd:dateTime .
 
-# The file spelling of git-lex:description (same pattern as pan:id): a Pan
+# Pan's spelling of subtexture:description (same pattern as pan:id): a Pan
 # file carries only pan and copia, so the universal is written under pan:.
 pan:description a owl:DatatypeProperty ;
-    owl:equivalentProperty git-lex:description ;
+    owl:equivalentProperty subtexture:description ;
     rdfs:label "description" ;
-    rdfs:comment "A short deliberate summary a person writes; the file spelling of git-lex:description. One value; overwrite it, do not repeat the key." ;
+    rdfs:comment "A short deliberate summary a person writes; Pan's spelling of subtexture:description. One value; overwrite it, do not repeat the key." ;
     rdfs:domain pan:Node ;
     rdfs:range xsd:string .
 
@@ -1296,21 +1313,20 @@ pan:vectorData a owl:ObjectProperty ;
 pan:item a owl:ObjectProperty ;
     rdfs:label "item" ;
     rdfs:comment "One record this reference's file holds. Reach records through here; never link them from the image." ;
-    rdfs:domain pan:Enrichment ; rdfs:range git-lex:Thing .
+    rdfs:domain pan:Enrichment ; rdfs:range subtexture:Thing .
 
 pan:thumbnail a owl:ObjectProperty ;
     rdfs:label "thumbnail" ;
     rdfs:comment "The Thumbnail Pan made of this media." ;
     rdfs:domain pan:Media ; rdfs:range pan:Thumbnail .
 
-# The file spelling of git-lex:relatedToId — the same property (goodlux,
-# 2026-09-16), see pan:id above. The producer writes it in the file; the graph
-# may carry either spelling and a reader treats them as one.
+# Pan's spelling of subtexture:relatedToId, the same property (goodlux,
+# 2026-09-16), see pan:id above. The producer writes it in the file.
 pan:relatedToId a owl:ObjectProperty ;
-    owl:equivalentProperty subtexture:relatedToId , git-lex:relatedToId ;
+    owl:equivalentProperty subtexture:relatedToId ;
     rdfs:label "relatedToId" ;
-    rdfs:comment "The Thing this media relates to (its Moment), written <ns/Class/id>; the file spelling of git-lex:relatedToId. Never the bare token." ;
-    rdfs:domain pan:Media ; rdfs:range git-lex:Thing .
+    rdfs:comment "The Thing this media relates to (its Moment), written <ns/Class/id>; Pan's spelling of subtexture:relatedToId. Never the bare token." ;
+    rdfs:domain pan:Media ; rdfs:range subtexture:Thing .
 
 # --- shared fields -------------------------------------------------------------
 # These apply to several pan classes (Enrichment, Region, Pose, Caption, …);
@@ -1476,9 +1492,7 @@ pan:headPose a owl:DatatypeProperty ;
 # -----------------------------------------------------------------------------
 # Every class requires exactly one identity. It is restricted as pan:id, the
 # universal via owl:equivalentProperty; the graph stores the pan: spelling,
-# same as the file (goodlux, 2026-09-17). The git-lex spelling was the 0.3.6
-# SHACL-generator workaround, and the generator is being fixed to follow
-# owl:equivalentProperty.
+# same as the file (goodlux, 2026-09-17).
 
 pan:Node rdfs:subClassOf
     [ a owl:Restriction ; owl:onProperty pan:id ; owl:cardinality 1 ] .
